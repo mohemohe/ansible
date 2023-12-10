@@ -6,3 +6,4 @@
   - amazonlinux2023-kpatch
   - docker
   - preinit-docker-swarm
+  - mackerel-agent

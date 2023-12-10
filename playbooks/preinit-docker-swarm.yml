@@ -2,8 +2,8 @@
   become: yes
   become_user: root
   roles:
-  - init
-  - amazonlinux2023-kpatch
-  - docker
-  - preinit-docker-swarm
-  - mackerel-agent
+    - init
+    - amazonlinux2023-kpatch
+    - docker
+    - preinit-docker-swarm
+    - mackerel-agent

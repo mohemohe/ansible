@@ -1,0 +1,104 @@
+---
+- name: Update System (Amazon)
+  ansible.builtin.dnf:
+    name: "*"
+    state: latest
+  when: ansible_facts.distribution == "Amazon"
+
+- name: Install utils (Amazon)
+  ansible.builtin.dnf:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - git
+    - htop
+    - iotop
+    - awscli-2
+  when: ansible_facts.distribution == "Amazon"
+
+- name: Update System (Ubuntu)
+  ansible.builtin.apt:
+    name: "*"
+    state: latest
+  when: ansible_facts.distribution == "Ubuntu"
+
+- name: Set timezone
+  community.general.timezone:
+    name: Asia/Tokyo
+
+- name: Disable IPv6 (sysctl)
+  ansible.builtin.sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: present
+    ignoreerrors: no
+  with_items:
+    - name: net.ipv6.conf.all.disable_ipv6
+      value: 1
+    - name: net.ipv6.conf.default.disable_ipv6
+      value: 1
+    - name: net.ipv6.conf.lo.disable_ipv6
+      value: 1
+    - name: net.ipv6.conf.eth0.disable_ipv6
+      value: 1
+  when: ansible_facts.distribution == "Amazon"
+
+- name: Disable IPv6 (network-scripts)
+  ansible.builtin.replace:
+    path: /etc/sysconfig/network-scripts/ifcfg-eth0
+    regexp: "{{ item.regexp }}"
+    replace: "{{ item.replace }}"
+  with_items:
+    - regexp: "^BOOTPROTO=.*$"
+      replace: "BOOTPROTO=none"
+    - regexp: "^DHCPV6C=yes$"
+      replace: "DHCPV6C=no"
+  when: ansible_facts.distribution == "Amazon"
+
+- name: Disable IPv6 (sysconfig)
+  ansible.builtin.lineinfile:
+    dest: /etc/sysconfig/network
+    insertafter: "^NETWORKING=.*$"
+    line: "{{ item }}"
+  with_items:
+    - "NETWORKING_IPV6=no"
+    - "IPV6_AUTOCONF=no"
+  when: ansible_facts.distribution == "Amazon"
+
+- name: Disable IPv6 (systemd-networkd)
+  ansible.builtin.lineinfile:
+    dest: /etc/systemd/network/10-cloud-init-eth0.network
+    insertafter: "^\\[Network\\]$"
+    line: "{{ item }}"
+  with_items:
+    - "LinkLocalAddressing=no"
+    - "IPv6AcceptRA=no"
+  when: ansible_facts.distribution == "Amazon"
+
+- name: Increase limits (sysctl)
+  ansible.builtin.sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: present
+    ignoreerrors: yes
+  with_items:
+    - name: net.core.somaxconn
+      value: 8192
+    - name: fs.file-max
+      value: 5242880
+
+- name: Increase limits (PAM)
+  community.general.pam_limits:
+    domain: "{{ item.domain }}"
+    limit_type: "{{ item.limit_type }}"
+    limit_item: nofile
+    value: 655360
+  with_items:
+    - domain: root
+      limit_type: soft
+    - domain: root
+      limit_type: hard
+    - domain: "*"
+      limit_type: soft
+    - domain: "*"
+      limit_type: hard

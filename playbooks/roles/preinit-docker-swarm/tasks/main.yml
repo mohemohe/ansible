@@ -1,0 +1,33 @@
+---
+- name: Mkdir mount point
+  ansible.builtin.file:
+    path: /data
+    state: directory
+    owner: root
+    group: root
+    mode: "777"
+
+- name: Add mount config
+  ansible.builtin.lineinfile:
+    dest: /etc/fstab
+    line: "{{ shared_drive.ip_addr }}:/{{ shared_drive.volume }}/{{ shared_drive.sub_dir }} /data nfs defaults 0 0"
+
+- name: Mount shared drive
+  ansible.builtin.shell: |-
+    mount -a
+
+- name: Mkdir /root/.aws
+  ansible.builtin.file:
+    path: /root/.aws
+    state: directory
+    owner: root
+    group: root
+    mode: "700"
+
+- name: Add credential for AWS CloudWatch Logs
+  ansible.builtin.template:
+    src: credentials.jinja
+    dest: /root/.aws/credentials
+    owner: root
+    group: root
+    mode: "600"

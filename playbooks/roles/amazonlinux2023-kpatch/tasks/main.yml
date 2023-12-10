@@ -1,0 +1,21 @@
+---
+- name: Install kpatch (Amazon)
+  ansible.builtin.dnf:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - kpatch-dnf
+    - kpatch-runtime
+  when: ansible_facts.distribution == "Amazon"
+
+- name: DNF plugin for Kernel Live Patching (Amazon)
+  ansible.builtin.shell: |-
+    dnf kernel-livepatch -y auto
+  when: ansible_facts.distribution == "Amazon"
+
+- name: Enable and start kpatch (Amazon)
+  ansible.builtin.systemd_service:
+    name: kpatch.service
+    state: started
+    enabled: true
+  when: ansible_facts.distribution == "Amazon"

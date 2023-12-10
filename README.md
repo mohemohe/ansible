@@ -4,10 +4,13 @@
 
 ```bash
 ./init.sh
+
+# copy some sample files
+
 ansible-playbook -i environments/docker-swarm/hosts playbooks/preinit-docker-swarm.yml
 ```
 
-## To add role
+## to add role
 
 ```bash
 cd playbooks/roles

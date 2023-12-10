@@ -102,3 +102,35 @@
       limit_type: soft
     - domain: "*"
       limit_type: hard
+
+- name: Create user mohemohe
+  ansible.builtin.user:
+    name: mohemohe
+    shell: /bin/bash
+    create_home: true
+    home: /home/mohemohe
+
+- name: Add mohemohe to sudoers
+  ansible.builtin.template:
+    src: sudoers.jinja
+    dest: /etc/sudoers.d/99-mohemohe
+    owner: root
+    group: root
+    mode: "600"
+
+- name: Create .ssh
+  ansible.builtin.file:
+    path: /home/mohemohe/.ssh
+    state: directory
+    owner: mohemohe
+    group: mohemohe
+    mode: "700"
+
+- name: Get authorized_keys from GitHub
+  ansible.builtin.get_url:
+    url: https://github.com/mohemohe.keys
+    dest: /home/mohemohe/.ssh/authorized_keys
+    force: true
+    owner: mohemohe
+    group: mohemohe
+    mode: "600"

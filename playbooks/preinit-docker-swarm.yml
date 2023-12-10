@@ -4,6 +4,7 @@
   roles:
     - init
     - amazonlinux2023-kpatch
+    - disable-ipv6
     - docker
     - preinit-docker-swarm
     - mackerel-agent

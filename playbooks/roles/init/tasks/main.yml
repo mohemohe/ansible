@@ -26,55 +26,6 @@
   community.general.timezone:
     name: Asia/Tokyo
 
-- name: Disable IPv6 (sysctl)
-  ansible.builtin.sysctl:
-    name: "{{ item.name }}"
-    value: "{{ item.value }}"
-    state: present
-    ignoreerrors: no
-  with_items:
-    - name: net.ipv6.conf.all.disable_ipv6
-      value: 1
-    - name: net.ipv6.conf.default.disable_ipv6
-      value: 1
-    - name: net.ipv6.conf.lo.disable_ipv6
-      value: 1
-    - name: net.ipv6.conf.eth0.disable_ipv6
-      value: 1
-  when: ansible_facts.distribution == "Amazon"
-
-- name: Disable IPv6 (network-scripts)
-  ansible.builtin.replace:
-    path: /etc/sysconfig/network-scripts/ifcfg-eth0
-    regexp: "{{ item.regexp }}"
-    replace: "{{ item.replace }}"
-  with_items:
-    - regexp: "^BOOTPROTO=.*$"
-      replace: "BOOTPROTO=none"
-    - regexp: "^DHCPV6C=yes$"
-      replace: "DHCPV6C=no"
-  when: ansible_facts.distribution == "Amazon"
-
-- name: Disable IPv6 (sysconfig)
-  ansible.builtin.lineinfile:
-    dest: /etc/sysconfig/network
-    insertafter: "^NETWORKING=.*$"
-    line: "{{ item }}"
-  with_items:
-    - "NETWORKING_IPV6=no"
-    - "IPV6_AUTOCONF=no"
-  when: ansible_facts.distribution == "Amazon"
-
-- name: Disable IPv6 (systemd-networkd)
-  ansible.builtin.lineinfile:
-    dest: /etc/systemd/network/10-cloud-init-eth0.network
-    insertafter: "^\\[Network\\]$"
-    line: "{{ item }}"
-  with_items:
-    - "LinkLocalAddressing=no"
-    - "IPv6AcceptRA=no"
-  when: ansible_facts.distribution == "Amazon"
-
 - name: Increase limits (sysctl)
   ansible.builtin.sysctl:
     name: "{{ item.name }}"

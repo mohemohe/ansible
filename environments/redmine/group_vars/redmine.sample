@@ -1,0 +1,8 @@
+ansible_ssh_user: ec2-user
+postgres_username: redmine
+postgres_password: ""
+aws_access_key_id: ""
+aws_secret_access_key: ""
+s3_bucket: ""
+s3_folder: "attachments"
+s3_region: "ap-northeast-1"

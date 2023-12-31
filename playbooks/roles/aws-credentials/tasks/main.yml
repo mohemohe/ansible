@@ -1,0 +1,16 @@
+---
+- name: Mkdir /root/.aws
+  ansible.builtin.file:
+    path: /root/.aws
+    state: directory
+    owner: root
+    group: root
+    mode: "700"
+
+- name: Add AWS credentials for root user
+  ansible.builtin.template:
+    src: credentials.jinja
+    dest: /root/.aws/credentials
+    owner: root
+    group: root
+    mode: "600"

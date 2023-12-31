@@ -5,6 +5,25 @@
     state: latest
   when: ansible_facts.distribution == "Amazon"
 
+- name: Mkdir /usr/local/lib/docker/cli-plugins (Amazon)
+  ansible.builtin.file:
+    path: /usr/local/lib/docker/cli-plugins
+    state: directory
+    recurse: true
+    owner: root
+    group: root
+    mode: "775"
+  when: ansible_facts.distribution == "Amazon"
+
+- name: Install Docker Compose V2 (Amazon)
+  ansible.builtin.get_url:
+    url: "https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-linux-x86_64"
+    dest: /usr/local/lib/docker/cli-plugins/docker-compose
+    owner: root
+    group: root
+    mode: '0775'
+  when: ansible_facts.distribution == "Amazon"
+
 - name: Install Docker (Ubuntu)
   ansible.builtin.shell: |-
     curl -L get.docker.com | bash

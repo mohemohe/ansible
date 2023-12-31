@@ -15,19 +15,3 @@
 - name: Mount shared drive
   ansible.builtin.shell: |-
     mount -a
-
-- name: Mkdir /root/.aws
-  ansible.builtin.file:
-    path: /root/.aws
-    state: directory
-    owner: root
-    group: root
-    mode: "700"
-
-- name: Add credential for AWS CloudWatch Logs
-  ansible.builtin.template:
-    src: credentials.jinja
-    dest: /root/.aws/credentials
-    owner: root
-    group: root
-    mode: "600"

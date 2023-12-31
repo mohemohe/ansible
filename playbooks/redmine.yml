@@ -1,0 +1,16 @@
+- hosts: postgres
+  gather_facts: yes
+
+- hosts: redmine
+  become: yes
+  become_user: root
+  pre_tasks:
+    - name: Set Postgres IP address
+      set_fact:
+        postgres_ip_addr: "{{ hostvars[groups['postgres'][0]]['ansible_default_ipv4']['address'] }}"
+  roles:
+    - init
+    - amazonlinux2023-kpatch
+    - disable-ipv6
+    - docker
+    - redmine

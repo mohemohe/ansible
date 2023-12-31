@@ -1,0 +1,78 @@
+---
+- name: Mkdir /opt/docker/redmine
+  ansible.builtin.file:
+    path: /opt/docker/redmine
+    state: directory
+    owner: root
+    group: root
+    mode: "700"
+
+- name: Add compose.yaml
+  ansible.builtin.template:
+    src: compose.yaml.jinja
+    dest: /opt/docker/redmine/compose.yaml
+    owner: root
+    group: root
+    mode: "600"
+
+- name: Update Redmine
+  # community.docker.docker_compose:
+  #   project_src: /opt/docker/redmine
+  ansible.builtin.shell:
+    cmd: docker compose pull
+    chdir: /opt/docker/redmine
+
+- name: Destroy Redmine
+  # community.docker.docker_compose:
+  #   project_src: /opt/docker/redmine
+  ansible.builtin.shell:
+    cmd: docker compose down -v
+    chdir: /opt/docker/redmine
+
+- name: Start Redmine
+  # community.docker.docker_compose:
+  #   project_src: /opt/docker/redmine
+  ansible.builtin.shell:
+    cmd: docker compose up -d
+    chdir: /opt/docker/redmine
+
+- name: Clone S3 plugin
+  ansible.builtin.git:
+    repo: "https://github.com/redmica/redmica_s3.git"
+    dest: /data/redmine/plugins/redmica_s3
+    force: true
+
+- name: Add s3.yml
+  ansible.builtin.template:
+    src: s3.yml.jinja
+    dest: /data/redmine/plugins/redmica_s3/config/s3.yml
+    owner: root
+    group: root
+    mode: "664"
+
+- name: Patch Gemfile
+  ansible.builtin.lineinfile:
+    dest: /data/redmine/plugins/redmica_s3/Gemfile
+    insertbefore: "BOF"
+    regexp: '^source "https://rubygems.org"$'
+    line: 'source "https://rubygems.org"'
+
+- name: Init S3 plugin
+  ansible.builtin.shell:
+    cmd: |-
+      docker compose exec redmine /bin/bash -c 'cd /usr/src/redmine/plugins/redmica_s3; bundle install'
+      docker compose cp /data/redmine/plugins/redmica_s3/config/s3.yml redmine:/usr/src/redmine/config/s3.yml
+    chdir: /opt/docker/redmine
+
+- name: Clone farend bleuclair theme
+  ansible.builtin.git:
+    repo: "https://github.com/farend/redmine_theme_farend_bleuclair.git"
+    dest: /data/redmine/public/themes/bleuclair
+    force: true
+
+- name: Restart Redmine
+  # community.docker.docker_compose:
+  #   project_src: /opt/docker/redmine
+  ansible.builtin.shell:
+    cmd: docker compose restart redmine
+    chdir: /opt/docker/redmine

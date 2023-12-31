@@ -1,2 +1,2 @@
 ---
-# vars file for test
+docker_compose_version: v2.23.3

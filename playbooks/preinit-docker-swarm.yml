@@ -6,5 +6,6 @@
     - amazonlinux2023-kpatch
     - disable-ipv6
     - docker
+    - aws-credentials
     - preinit-docker-swarm
     - mackerel-agent

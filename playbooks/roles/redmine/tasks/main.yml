@@ -36,13 +36,13 @@
     cmd: docker compose up -d
     chdir: /opt/docker/redmine
 
-- name: Clone S3 plugin
+- name: S3 plugin | Clone
   ansible.builtin.git:
     repo: "https://github.com/redmica/redmica_s3.git"
     dest: /data/redmine/plugins/redmica_s3
     force: true
 
-- name: Add s3.yml
+- name: S3 plugin | Add s3.yml
   ansible.builtin.template:
     src: s3.yml.jinja
     dest: /data/redmine/plugins/redmica_s3/config/s3.yml
@@ -50,21 +50,41 @@
     group: root
     mode: "664"
 
-- name: Patch Gemfile
+- name: S3 plugin | Patch Gemfile
   ansible.builtin.lineinfile:
     dest: /data/redmine/plugins/redmica_s3/Gemfile
     insertbefore: "BOF"
     regexp: '^source "https://rubygems.org"$'
     line: 'source "https://rubygems.org"'
 
-- name: Init S3 plugin
+- name: S3 plugin | Init
   ansible.builtin.shell:
     cmd: |-
       docker compose exec redmine /bin/bash -c 'cd /usr/src/redmine/plugins/redmica_s3; bundle install'
       docker compose cp /data/redmine/plugins/redmica_s3/config/s3.yml redmine:/usr/src/redmine/config/s3.yml
     chdir: /opt/docker/redmine
 
-- name: Clone farend bleuclair theme
+- name: View customize plugin | Clone
+  ansible.builtin.git:
+    repo: "https://github.com/onozaty/redmine-view-customize.git"
+    dest: /data/redmine/plugins/view_customize
+    force: true
+
+- name: View customize plugin | Patch Gemfile
+  ansible.builtin.lineinfile:
+    dest: /data/redmine/plugins/view_customize/Gemfile
+    insertbefore: "BOF"
+    regexp: '^source "https://rubygems.org"$'
+    line: 'source "https://rubygems.org"'
+
+- name: View customize plugin | Init
+  ansible.builtin.shell:
+    cmd: |-
+      docker compose exec redmine /bin/bash -c 'apt update; apt install -y build-essential'
+      docker compose exec redmine /bin/bash -c 'cd /usr/src/redmine/plugins/view_customize; bundle install'
+    chdir: /opt/docker/redmine
+
+- name: bleuclair theme | Clone
   ansible.builtin.git:
     repo: "https://github.com/farend/redmine_theme_farend_bleuclair.git"
     dest: /data/redmine/public/themes/bleuclair

@@ -14,12 +14,42 @@
     - htop
     - iotop
     - awscli-2
+    - avahi
+  when: ansible_facts.distribution == "Amazon"
+
+- name: Enable services (Amazon)
+  ansible.builtin.systemd_service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  with_items:
+    - avahi-daemon
   when: ansible_facts.distribution == "Amazon"
 
 - name: Update System (Ubuntu)
   ansible.builtin.apt:
     name: "*"
     state: latest
+  when: ansible_facts.distribution == "Ubuntu"
+
+- name: Install utils (Ubuntu)
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - git
+    - htop
+    - iotop
+    - avahi-daemon
+  when: ansible_facts.distribution == "Ubuntu"
+
+- name: Enable services (Ubuntu)
+  ansible.builtin.systemd_service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  with_items:
+    - avahi-daemon
   when: ansible_facts.distribution == "Ubuntu"
 
 - name: Set timezone

@@ -1,0 +1,8 @@
+- hosts: docker-only
+  become: yes
+  become_user: root
+  roles:
+    - init
+    - amazonlinux2023-kpatch
+    - disable-ipv6
+    - docker

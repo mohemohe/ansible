@@ -34,3 +34,19 @@
     name: docker.service
     state: started
     enabled: true
+
+- name: Mkdir data dir
+  ansible.builtin.file:
+    path: /data
+    state: directory
+    owner: root
+    group: root
+    mode: "777"
+
+- name: Mkdir compose dir
+  ansible.builtin.file:
+    path: /opt/docker
+    state: directory
+    owner: root
+    group: root
+    mode: "777"

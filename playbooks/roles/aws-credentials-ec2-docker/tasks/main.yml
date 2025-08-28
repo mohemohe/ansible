@@ -1,0 +1,14 @@
+---
+- name: Change HttpPutResponseHopLimit EC2 host metadata
+  delegate_to: localhost
+  become: false
+  ansible.builtin.command:
+    cmd: |-
+      aws ec2 modify-instance-metadata-options
+      --instance-id {{ ec2_instance_id }}
+      --region ap-northeast-1
+      --http-put-response-hop-limit 2
+      --http-endpoint enabled
+      {% if aws_cli_profile is defined %}
+      --profile {{ aws_cli_profile }}
+      {% endif %}

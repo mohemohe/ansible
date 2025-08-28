@@ -1,0 +1,170 @@
+
+PLAY [postgres] ****************************************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [172.16.34.201]
+
+PLAY [redmine] *****************************************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [172.16.33.20]
+
+TASK [Set Postgres IP address] *************************************************
+ok: [172.16.33.20]
+
+TASK [init : Update System (Amazon)] *******************************************
+ok: [172.16.33.20]
+
+TASK [init : Install utils (Amazon)] *******************************************
+ok: [172.16.33.20] => (item=git)
+ok: [172.16.33.20] => (item=htop)
+ok: [172.16.33.20] => (item=iotop)
+ok: [172.16.33.20] => (item=awscli-2)
+ok: [172.16.33.20] => (item=avahi)
+
+TASK [init : Enable services (Amazon)] *****************************************
+ok: [172.16.33.20] => (item=avahi-daemon)
+
+TASK [init : Update System (Ubuntu)] *******************************************
+skipping: [172.16.33.20]
+
+TASK [init : Install utils (Ubuntu)] *******************************************
+skipping: [172.16.33.20] => (item=git) 
+skipping: [172.16.33.20] => (item=htop) 
+skipping: [172.16.33.20] => (item=iotop) 
+skipping: [172.16.33.20] => (item=avahi-daemon) 
+skipping: [172.16.33.20]
+
+TASK [init : Enable services (Ubuntu)] *****************************************
+skipping: [172.16.33.20] => (item=avahi-daemon) 
+skipping: [172.16.33.20]
+
+TASK [init : Set timezone] *****************************************************
+ok: [172.16.33.20]
+
+TASK [init : Increase limits (sysctl)] *****************************************
+ok: [172.16.33.20] => (item={'name': 'net.core.somaxconn', 'value': 8192})
+ok: [172.16.33.20] => (item={'name': 'fs.file-max', 'value': 5242880})
+
+TASK [init : Increase limits (PAM)] ********************************************
+ok: [172.16.33.20] => (item={'domain': 'root', 'limit_type': 'soft'})
+ok: [172.16.33.20] => (item={'domain': 'root', 'limit_type': 'hard'})
+ok: [172.16.33.20] => (item={'domain': '*', 'limit_type': 'soft'})
+ok: [172.16.33.20] => (item={'domain': '*', 'limit_type': 'hard'})
+
+TASK [init : Create user mohemohe] *********************************************
+ok: [172.16.33.20]
+
+TASK [init : Add mohemohe to sudoers] ******************************************
+ok: [172.16.33.20]
+
+TASK [init : Create .ssh] ******************************************************
+ok: [172.16.33.20]
+
+TASK [init : Get authorized_keys from GitHub] **********************************
+ok: [172.16.33.20]
+
+TASK [amazonlinux2023-kpatch : Install kpatch (Amazon)] ************************
+ok: [172.16.33.20] => (item=kpatch-dnf)
+ok: [172.16.33.20] => (item=kpatch-runtime)
+
+TASK [amazonlinux2023-kpatch : DNF plugin for Kernel Live Patching (Amazon)] ***
+changed: [172.16.33.20]
+
+TASK [amazonlinux2023-kpatch : Enable and start kpatch (Amazon)] ***************
+ok: [172.16.33.20]
+
+TASK [disable-ipv6 : Disable IPv6 (sysctl)] ************************************
+ok: [172.16.33.20] => (item={'name': 'net.ipv6.conf.all.disable_ipv6', 'value': 1})
+ok: [172.16.33.20] => (item={'name': 'net.ipv6.conf.default.disable_ipv6', 'value': 1})
+ok: [172.16.33.20] => (item={'name': 'net.ipv6.conf.lo.disable_ipv6', 'value': 1})
+ok: [172.16.33.20] => (item={'name': 'net.ipv6.conf.eth0.disable_ipv6', 'value': 1})
+
+TASK [disable-ipv6 : Disable IPv6 (network-scripts)] ***************************
+ok: [172.16.33.20] => (item={'regexp': '^BOOTPROTO=.*$', 'replace': 'BOOTPROTO=none'})
+ok: [172.16.33.20] => (item={'regexp': '^DHCPV6C=yes$', 'replace': 'DHCPV6C=no'})
+
+TASK [disable-ipv6 : Disable IPv6 (sysconfig)] *********************************
+ok: [172.16.33.20] => (item=NETWORKING_IPV6=no)
+ok: [172.16.33.20] => (item=IPV6_AUTOCONF=no)
+
+TASK [disable-ipv6 : Disable IPv6 (systemd-networkd)] **************************
+ok: [172.16.33.20] => (item=LinkLocalAddressing=no)
+ok: [172.16.33.20] => (item=IPv6AcceptRA=no)
+
+TASK [docker : Install Docker (Amazon)] ****************************************
+ok: [172.16.33.20]
+
+TASK [docker : Mkdir /usr/local/lib/docker/cli-plugins (Amazon)] ***************
+ok: [172.16.33.20]
+
+TASK [docker : Install Docker Compose V2 (Amazon)] *****************************
+ok: [172.16.33.20]
+
+TASK [docker : Install Docker (Ubuntu)] ****************************************
+skipping: [172.16.33.20]
+
+TASK [docker : Enable and start Docker] ****************************************
+ok: [172.16.33.20]
+
+TASK [docker : Mkdir data dir] *************************************************
+ok: [172.16.33.20]
+
+TASK [docker : Mkdir compose dir] **********************************************
+ok: [172.16.33.20]
+
+TASK [redmine : Mkdir /opt/docker/redmine] *************************************
+ok: [172.16.33.20]
+
+TASK [redmine : Add compose.yaml] **********************************************
+ok: [172.16.33.20]
+
+TASK [redmine : Update Redmine] ************************************************
+changed: [172.16.33.20]
+
+TASK [redmine : Destroy Redmine] ***********************************************
+changed: [172.16.33.20]
+
+TASK [redmine : Start Redmine] *************************************************
+changed: [172.16.33.20]
+
+TASK [redmine : Install build dependencies] ************************************
+changed: [172.16.33.20]
+
+TASK [redmine : S3 plugin | Clone] *********************************************
+changed: [172.16.33.20]
+
+TASK [redmine : S3 plugin | Add s3.yml] ****************************************
+ok: [172.16.33.20]
+
+TASK [redmine : S3 plugin | Patch Gemfile] *************************************
+changed: [172.16.33.20]
+
+TASK [redmine : S3 plugin | Init] **********************************************
+changed: [172.16.33.20]
+
+TASK [redmine : View customize plugin | Clone] *********************************
+changed: [172.16.33.20]
+
+TASK [redmine : View customize plugin | Patch Gemfile] *************************
+changed: [172.16.33.20]
+
+TASK [redmine : View customize plugin | Init] **********************************
+changed: [172.16.33.20]
+
+TASK [redmine : AI helper plugin | Clone] **************************************
+ok: [172.16.33.20]
+
+TASK [redmine : AI helper plugin | Init] ***************************************
+changed: [172.16.33.20]
+
+TASK [redmine : bleuclair theme | Clone] ***************************************
+changed: [172.16.33.20]
+
+TASK [redmine : Restart Redmine] ***********************************************
+changed: [172.16.33.20]
+
+PLAY RECAP *********************************************************************
+172.16.33.20               : ok=42   changed=14   unreachable=0    failed=0    skipped=4    rescued=0    ignored=0   
+172.16.34.201              : ok=1    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+

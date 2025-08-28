@@ -4,5 +4,5 @@
   roles:
     - init
     - amazonlinux2023-kpatch
-    - disable-ipv6
+    # - disable-ipv6
     - docker

@@ -36,6 +36,11 @@
     cmd: docker compose up -d
     chdir: /opt/docker/redmine
 
+- name: Install build dependencies
+  ansible.builtin.shell:
+    cmd: docker compose exec redmine /bin/bash -c 'apt update; apt install -y build-essential'
+    chdir: /opt/docker/redmine
+
 - name: S3 plugin | Clone
   ansible.builtin.git:
     repo: "https://github.com/redmica/redmica_s3.git"
@@ -79,9 +84,20 @@
 
 - name: View customize plugin | Init
   ansible.builtin.shell:
+    cmd: docker compose exec redmine /bin/bash -c 'cd /usr/src/redmine/plugins/view_customize; bundle install'
+    chdir: /opt/docker/redmine
+
+- name: AI helper plugin | Clone
+  ansible.builtin.git:
+    repo: "https://github.com/haru/redmine_ai_helper.git"
+    dest: /data/redmine/plugins/redmine_ai_helper
+    force: true
+
+- name: AI helper plugin | Init
+  ansible.builtin.shell:
     cmd: |-
-      docker compose exec redmine /bin/bash -c 'apt update; apt install -y build-essential'
-      docker compose exec redmine /bin/bash -c 'cd /usr/src/redmine/plugins/view_customize; bundle install'
+      docker compose exec redmine /bin/bash -c 'cd /usr/src/redmine/plugins/redmine_ai_helper; bundle install'
+      docker compose exec redmine /bin/bash -c 'cd /usr/src/redmine; bundle exec rake redmine:plugins:migrate RAILS_ENV=production'
     chdir: /opt/docker/redmine
 
 - name: bleuclair theme | Clone

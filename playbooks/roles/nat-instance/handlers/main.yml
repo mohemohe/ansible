@@ -1,0 +1,8 @@
+---
+# handlers file for nat-instance
+
+- name: Restart nftables
+  ansible.builtin.systemd:
+    name: nftables
+    state: restarted
+  listen: Restart nftables

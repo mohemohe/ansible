@@ -1,0 +1,55 @@
+---
+# tasks file for nat-instance
+
+# Ensure net.ipv4.ip_forward is set to 1
+- name: Set net.ipv4.ip_forward
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_forward
+    value: "1"
+    sysctl_set: true
+    state: present
+    reload: true
+    sysctl_file: /etc/sysctl.conf
+
+# Install nftables
+- name: Install nftables
+  ansible.builtin.yum:
+    name: nftables
+    state: present
+
+# Configure nftables for NAT
+
+- name: Add nftable table ip nat
+  ansible.builtin.command: sudo nft add table ip nat
+  ignore_errors: true # Ignore if table already exists
+
+- name: Add nftable chain prerouting
+  ansible.builtin.command: sudo nft -- add chain ip nat prerouting \{ type nat hook prerouting priority -100 \; \}
+  ignore_errors: true # Ignore if chain already exists
+
+- name: Add nftable chain postrouting
+  ansible.builtin.command: sudo nft add chain ip nat postrouting \{ type nat hook postrouting priority 100 \; \}
+  ignore_errors: true # Ignore if chain already exists
+
+- name: Add nftable rule masquerade
+  ansible.builtin.command: "sudo nft add rule ip nat postrouting oifname {{ ansible_default_ipv4.interface | quote }} masquerade"
+  ignore_errors: true # Ignore if rule already exists
+  notify: Restart nftables
+
+- name: Save nftables configuration
+  ansible.builtin.shell: sudo nft list table ip nat | sudo tee /etc/nftables/al2023-nat.nft
+  args:
+    creates: /etc/nftables/al2023-nat.nft # Prevent rerunning if config exists initially
+
+- name: Include nftables config in sysconfig
+  ansible.builtin.lineinfile:
+    path: /etc/sysconfig/nftables.conf
+    line: 'include "/etc/nftables/al2023-nat.nft"'
+    create: true
+    insertafter: EOF
+
+- name: Ensure nftables service is enabled and running
+  ansible.builtin.systemd:
+    name: nftables
+    state: started
+    enabled: true
